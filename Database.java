@@ -6,7 +6,7 @@ class Database {
     public static void connect() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost/private_raffle?serverTimezone=America/New_York", "root", "database28");
+            connection = DriverManager.getConnection("jdbc:mysql://localhost/gymdatabase?serverTimezone=America/New_York", "root", "database28");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

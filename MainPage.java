@@ -11,12 +11,11 @@ public class MainPage extends JFrame {
         this.setContentPane(this.jpanel);
         this.setTitle("MainMenu");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setBounds(0,0,1260,720);
+        this.setBounds(0,0,1000,600);
         this.setVisible(true);
 
         //Action Listeners
         setSignUpButtonAction();
-
         }
 
     public static void main(String[]args){ //Main Method
