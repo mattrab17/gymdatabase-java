@@ -2,6 +2,8 @@ import javax.swing.*;
 
 public class CustomerPage extends JFrame {
 
+    private JPanel panel;
+
     public CustomerPage() {
         setTitle("Customer Dashboard");
         setSize(500, 400);

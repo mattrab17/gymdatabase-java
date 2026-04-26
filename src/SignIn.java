@@ -38,56 +38,82 @@ public class SignIn extends JFrame {
         });
     }
     public void loginUser() {
-
         String username = textField1.getText();
-        String password = new String(passwordField1.getPassword());
+        char[] inputtedPassword = passwordField1.getPassword();
+        char[] decryptedDatabasePassword = null;
 
         try {
-
-            // Check Employees first
-            String employeeSQL =
-                    "SELECT employeetypeid FROM employees WHERE username = ? AND password = ?";
-
-            PreparedStatement stmt1 =
-                    Database.connection.prepareStatement(employeeSQL);
-
+            // CHECK THE EMPLOYEES TABLE
+            String employeeSQL = "SELECT password, employeetypeid, is_admin FROM JavaGymDatabase.Employees WHERE username = ?";
+            PreparedStatement stmt1 = Database.connection.prepareStatement(employeeSQL);
             stmt1.setString(1, username);
-            stmt1.setString(2, password);
-
             ResultSet rs1 = stmt1.executeQuery();
 
-            int type = -1; // intellij gets mad if you don't set a default val
             if (rs1.next()) {
-                type = rs1.getInt("employeetypeid");
-                JOptionPane.showMessageDialog(this, "Employee Login Success");
-                this.dispose();
-                new EmployeePage(type);
-                return;
+                String encryptedPassword = rs1.getString("password");
+                int type = rs1.getInt("employeetypeid");
+                int isAdmin = rs1.getInt("is_admin");
+
+                // Decrypt the password
+                decryptedDatabasePassword = EncryptionManager.decrypt(encryptedPassword);
+
+                // Compare passwords
+                if (decryptedDatabasePassword != null && java.util.Arrays.equals(inputtedPassword, decryptedDatabasePassword)) {
+                    JOptionPane.showMessageDialog(this, "Employee Login Success");
+                    this.dispose();
+
+                    // Navigate to the correct page
+                    if (isAdmin == 1) { //if employee is an admin
+                        //new AdminPage(); // go to admin page
+                    } else { //if employee is not an admin
+                        new EmployeePage(type); //go to the employee's specific role page
+                    }
+                    return; //exit method
+                } else { //Password is incorrect
+                    JOptionPane.showMessageDialog(this, "Invalid Password");
+                    return;
+                }
             }
 
-            // Check Customers
-            String customerSQL =
-                    "SELECT * FROM customers WHERE username = ? AND password = ?";
-
-            PreparedStatement stmt2 =
-                    Database.connection.prepareStatement(customerSQL);
-
+            // CHECK THE CUSTOMERS TABLE
+            String customerSQL = "SELECT password FROM JavaGymDatabase.Customers WHERE username = ?";
+            PreparedStatement stmt2 = Database.connection.prepareStatement(customerSQL);
             stmt2.setString(1, username);
-            stmt2.setString(2, password);
-
             ResultSet rs2 = stmt2.executeQuery();
 
             if (rs2.next()) {
-                JOptionPane.showMessageDialog(this, "Customer Login Success");
-                this.dispose();
-                new CustomerPage();
-                return;
+                String encryptedPassword = rs2.getString("password");
+
+                // Decrypt the password
+                decryptedDatabasePassword = EncryptionManager.decrypt(encryptedPassword);
+
+                if (decryptedDatabasePassword != null && java.util.Arrays.equals(inputtedPassword, decryptedDatabasePassword)) {
+                    JOptionPane.showMessageDialog(this, "Customer Login Success");
+                    this.dispose();
+
+                    // Navigate to customer page
+                    new CustomerPage();
+                    return;
+                } else {
+                    JOptionPane.showMessageDialog(this, "Invalid Password");
+                    return;
+                }
             }
 
-            JOptionPane.showMessageDialog(this, "Invalid Login");
+            //  Neither a user or employee was found
+            JOptionPane.showMessageDialog(this, "Invalid Login: User not found.");
 
         } catch (Exception ex) {
             ex.printStackTrace();
+        } finally {
+           //wipe the plain text password from memory
+            if (inputtedPassword != null) {
+                java.util.Arrays.fill(inputtedPassword, '0');
+            }
+            //wipe the decrypted database password from memory
+            if (decryptedDatabasePassword != null) {
+                java.util.Arrays.fill(decryptedDatabasePassword, '0');
+            }
         }
     }
 }
