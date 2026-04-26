@@ -17,23 +17,37 @@ public class SignUp extends JFrame{
     private JCheckBox yearly$49999CheckBox;
     private JButton signUpButton;
     private JTextField phonenumberfield;
+    private JButton button1;
 
 
     public SignUp(){
         this.setContentPane(this.jpanel);
         this.setTitle("MainMenu");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setBounds(0,0,1000,600);
+        this.setSize(800,600);
+        this.setLocationRelativeTo(null);
         this.setVisible(true);
 
         //Action Listeners
         actionListenerSignUpButton();
-
+        actionListenerGoBackButton();
 
 
     }
 
+    public void actionListenerGoBackButton() {
+        button1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                goBack();
+            }
+        });
+    }
 
+    public void goBack() {
+        this.dispose();
+        new MainPage();
+    }
 
     //Encryption Code
     public static String getEncryptedPassword(char[] unencryptedPassword) {

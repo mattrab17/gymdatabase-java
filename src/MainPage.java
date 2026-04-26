@@ -9,7 +9,7 @@ public class MainPage extends JFrame {
         setContentPane(jpanel);
         setTitle("Main Menu");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1000, 600);
+        setSize(500, 300);
         setLocationRelativeTo(null); // centers window
         setVisible(true);
 

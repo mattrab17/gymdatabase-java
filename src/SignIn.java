@@ -8,14 +8,16 @@ public class SignIn extends JFrame {
     private JPanel jpanel;
     private JTextField textField1;
     private JPasswordField passwordField1;
-    private JButton Submit;
+    private JButton SignIn;
+    private JButton goBackButton;
 
 
     public SignIn() {
         this.setContentPane(jpanel);
         this.setTitle("Sign In");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setBounds(0,0,500,400);
+        this.setSize(600,400);
+        this.setLocationRelativeTo(null);
         this.setVisible(true);
 
         textField1.addActionListener(new ActionListener() {
@@ -30,13 +32,27 @@ public class SignIn extends JFrame {
 
             }
         });
-        Submit.addActionListener(new ActionListener() {
+
+        //SIGN IN BUTTON ACTION LISTENER
+        SignIn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                loginUser();
+                loginUser(); //log in method
+            }
+        });
+        goBackButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                goBack();
             }
         });
     }
+
+    public void goBack() {
+        this.dispose();
+        new MainPage();
+    }
+    //Log In
     public void loginUser() {
         String username = textField1.getText();
         char[] inputtedPassword = passwordField1.getPassword();
@@ -44,7 +60,7 @@ public class SignIn extends JFrame {
 
         try {
             // CHECK THE EMPLOYEES TABLE
-            String employeeSQL = "SELECT password, employeetypeid, is_admin FROM JavaGymDatabase.Employees WHERE username = ?";
+            String employeeSQL = "SELECT employee_id, password, employeetypeid, is_admin FROM JavaGymDatabase.Employees WHERE username = ?";
             PreparedStatement stmt1 = Database.connection.prepareStatement(employeeSQL);
             stmt1.setString(1, username);
             ResultSet rs1 = stmt1.executeQuery();
@@ -62,6 +78,10 @@ public class SignIn extends JFrame {
                     JOptionPane.showMessageDialog(this, "Employee Login Success");
                     this.dispose();
 
+                    //User Session Code:
+                    UserSession.userId = rs1.getInt("employee_id");
+                    UserSession.userTable = "Employees";
+
                     // Navigate to the correct page
                     if (isAdmin == 1) { //if employee is an admin
                         //new AdminPage(); // go to admin page
@@ -76,7 +96,7 @@ public class SignIn extends JFrame {
             }
 
             // CHECK THE CUSTOMERS TABLE
-            String customerSQL = "SELECT password FROM JavaGymDatabase.Customers WHERE username = ?";
+            String customerSQL = "SELECT customer_id, password FROM JavaGymDatabase.Customers WHERE username = ?";
             PreparedStatement stmt2 = Database.connection.prepareStatement(customerSQL);
             stmt2.setString(1, username);
             ResultSet rs2 = stmt2.executeQuery();
@@ -91,6 +111,9 @@ public class SignIn extends JFrame {
                     JOptionPane.showMessageDialog(this, "Customer Login Success");
                     this.dispose();
 
+                    //User Session Code:
+                    UserSession.userId = rs2.getInt("customer_id");
+                    UserSession.userTable = "Customers";
                     // Navigate to customer page
                     new CustomerPage();
                     return;
