@@ -8,6 +8,7 @@ public class CustomerPage extends JFrame {
     private JButton accountSettingsButton;
     private JButton viewYourClassesButton;
     private JButton bookAClassButton;
+    private JButton logOutButton;
 
     public CustomerPage() {
         this.setContentPane(panel);
@@ -19,8 +20,23 @@ public class CustomerPage extends JFrame {
 
         //Action Listeners
         actionListenerAccountSettingsButton();
+        actionListenerLogOutButton();
     }
 
+    public void actionListenerLogOutButton() {
+        logOutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                logout();
+            }
+        });
+    }
+
+    public void logout() {
+        UserSession.logout();
+        this.dispose();
+        new MainPage();
+    }
     public void actionListenerAccountSettingsButton() {
         accountSettingsButton.addActionListener(new ActionListener() {
             @Override

@@ -77,6 +77,7 @@ public class SignIn extends JFrame {
                 if (decryptedDatabasePassword != null && java.util.Arrays.equals(inputtedPassword, decryptedDatabasePassword)) {
                     JOptionPane.showMessageDialog(this, "Employee Login Success");
                     this.dispose();
+                    new EmployeePage(type);
 
                     //User Session Code:
                     UserSession.userId = rs1.getInt("employee_id");
