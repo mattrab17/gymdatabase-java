@@ -374,8 +374,7 @@ public class EmployeePage extends JFrame {
             String sql =
                     "SELECT class_name, date, time FROM JavaGymDatabase.Classes";
 
-            PreparedStatement stmt =
-                    Database.connection.prepareStatement(sql);
+            PreparedStatement stmt = Database.connection.prepareStatement(sql);
 
             ResultSet rs = stmt.executeQuery();
 
