@@ -21,7 +21,6 @@ public class EmployeePage extends JFrame {
         title = new JLabel("", SwingConstants.CENTER);
         panel.add(title);
 
-
         // receptionist dashboard
         if (type == 2) {
             title.setText("Receptionist Dashboard");
@@ -38,6 +37,8 @@ public class EmployeePage extends JFrame {
 
             viewMembersBtn.addActionListener(e -> viewMembers());
             viewClassesBtn.addActionListener(e -> viewClasses());
+            cancelMembershipBtn.addActionListener(e -> cancelMembership());
+            viewAppointmentsBtn.addActionListener(e -> viewTrainerAppointments());
         }
 
         // fitness coach dashboard
@@ -50,9 +51,9 @@ public class EmployeePage extends JFrame {
             panel.add(createClassBtn);
             panel.add(cancelClassBtn);
 
-            createClassBtn.addActionListener(e -> createClass());
+            createClassBtn.addActionListener(e -> openCreateClassPage());
+            cancelClassBtn.addActionListener(e -> openCancelClassPage());
         }
-
 
         // trainer dashboard
         else if (type == 4) {
@@ -67,8 +68,9 @@ public class EmployeePage extends JFrame {
             panel.add(declineBtn);
 
             viewAppointmentsBtn.addActionListener(e -> viewAppointments());
+            acceptBtn.addActionListener(e -> updateAppointmentStatus("Accepted"));
+            declineBtn.addActionListener(e -> updateAppointmentStatus("Declined"));
         }
-
 
         // admin dashboard
         else if (type == 3) {
@@ -90,23 +92,240 @@ public class EmployeePage extends JFrame {
         setVisible(true);
     }
 
+    // Cancel Membership
+    private void cancelMembership() {
+
+        JFrame frame = new JFrame("Cancel Membership");
+        frame.setSize(300, 200);
+        frame.setLocationRelativeTo(null);
+
+        JPanel p = new JPanel(new GridLayout(2,2,10,10));
+
+        JTextField customerId = new JTextField();
+        JButton cancelBtn = new JButton("Cancel");
+
+        p.add(new JLabel("Customer ID:"));
+        p.add(customerId);
+        p.add(new JLabel(""));
+        p.add(cancelBtn);
+
+        cancelBtn.addActionListener(e -> {
+            try {
+
+                String sql =
+                        "UPDATE JavaGymDatabase.Customers " +
+                                "SET membership_id = NULL " +
+                                "WHERE customer_id = ?";
+
+                PreparedStatement stmt = Database.connection.prepareStatement(sql);
+
+                stmt.setInt(1, Integer.parseInt(customerId.getText()));
+
+                int rows = stmt.executeUpdate();
+
+                if(rows > 0){
+                    JOptionPane.showMessageDialog(frame,
+                            "Membership Cancelled");
+                    frame.dispose();
+                }
+                else{
+                    JOptionPane.showMessageDialog(frame,
+                            "Customer Not Found");
+                }
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(frame,
+                        "Error cancelling membership");
+            }
+        });
+
+        frame.setContentPane(p);
+        frame.setVisible(true);
+    }
 
 
 
-    // methods for interaction w/ database
-    // view customers
+    // View trainer appointments
+    private void viewTrainerAppointments() {
+
+        try {
+
+            String sql =
+                    "SELECT a.appointment_id, c.full_name, cl.class_name, a.status " +
+                            "FROM JavaGymDatabase.Appointments a " +
+                            "JOIN JavaGymDatabase.Customers c ON a.customer_id = c.customer_id " +
+                            "JOIN JavaGymDatabase.Classes cl ON a.classes_id = cl.classes_id " +
+                            "JOIN JavaGymDatabase.Employees e ON a.employee_id = e.employee_id " +
+                            "WHERE e.employeetypeid = 4";
+
+            PreparedStatement stmt = Database.connection.prepareStatement(sql);
+
+            ResultSet rs = stmt.executeQuery();
+
+            StringBuilder output =
+                    new StringBuilder("TRAINER APPOINTMENTS:\n\n");
+
+            while(rs.next()){
+
+                output.append("Appointment ID: ")
+                        .append(rs.getInt("appointment_id"))
+                        .append(" | Customer: ")
+                        .append(rs.getString("full_name"))
+                        .append(" | Class: ")
+                        .append(rs.getString("class_name"))
+                        .append(" | Status: ")
+                        .append(rs.getString("status"))
+                        .append("\n");
+            }
+
+            JOptionPane.showMessageDialog(this, output.toString());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "Error loading appointments");
+        }
+    }
+
+    // Create class page
+
+    private void openCreateClassPage() {
+
+        JFrame frame = new JFrame("Create Class");
+        frame.setSize(400, 400);
+        frame.setLocationRelativeTo(null);
+
+        JPanel p = new JPanel(new GridLayout(6,2,10,10));
+
+        JTextField className = new JTextField();
+        JTextField date = new JTextField();
+        JTextField time = new JTextField();
+        JTextField employeeId = new JTextField();
+        JTextField groupClass = new JTextField();
+
+        JButton submit = new JButton("Create");
+
+        p.add(new JLabel("Class Name:"));
+        p.add(className);
+
+        p.add(new JLabel("Date (YYYY-MM-DD):"));
+        p.add(date);
+
+        p.add(new JLabel("Time (HH:MM:SS):"));
+        p.add(time);
+
+        p.add(new JLabel("Employee ID:"));
+        p.add(employeeId);
+
+        p.add(new JLabel("Is Group Class (0/1):"));
+        p.add(groupClass);
+
+        p.add(new JLabel(""));
+        p.add(submit);
+
+        submit.addActionListener(e -> {
+            try {
+                String sql = "INSERT INTO JavaGymDatabase.Classes " +
+                        "(class_name, date, time, employee_id, isGroupClass) " +
+                        "VALUES (?, ?, ?, ?, ?)";
+
+                PreparedStatement stmt = Database.connection.prepareStatement(sql);
+
+                stmt.setString(1, className.getText());
+                stmt.setString(2, date.getText());
+                stmt.setString(3, time.getText());
+                stmt.setInt(4, Integer.parseInt(employeeId.getText()));
+                stmt.setInt(5, Integer.parseInt(groupClass.getText()));
+
+                stmt.executeUpdate();
+
+                JOptionPane.showMessageDialog(frame,
+                        "Class Created Successfully");
+
+                frame.dispose();
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(frame,
+                        "Failed to create class");
+            }
+        });
+
+        frame.setContentPane(p);
+        frame.setVisible(true);
+    }
+
+
+    // Cancel class page
+
+    private void openCancelClassPage() {
+
+        JFrame frame = new JFrame("Cancel Class");
+        frame.setSize(300, 200);
+        frame.setLocationRelativeTo(null);
+
+        JPanel p = new JPanel(new GridLayout(2,2,10,10));
+
+        JTextField classId = new JTextField();
+        JButton deleteBtn = new JButton("Delete");
+
+        p.add(new JLabel("Class ID:"));
+        p.add(classId);
+        p.add(new JLabel(""));
+        p.add(deleteBtn);
+
+        deleteBtn.addActionListener(e -> {
+            try {
+                String sql =
+                        "DELETE FROM JavaGymDatabase.Classes WHERE classes_id = ?";
+
+                PreparedStatement stmt =
+                        Database.connection.prepareStatement(sql);
+
+                stmt.setInt(1,
+                        Integer.parseInt(classId.getText()));
+
+                int rows = stmt.executeUpdate();
+
+                if(rows > 0){
+                    JOptionPane.showMessageDialog(frame,
+                            "Class Deleted");
+                    frame.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(frame,
+                            "Class Not Found");
+                }
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(frame,
+                        "Error deleting class");
+            }
+        });
+
+        frame.setContentPane(p);
+        frame.setVisible(true);
+    }
+
+
+    // View methods
+
+
     private void viewMembers() {
         try {
-            String sql = "SELECT customer_id, full_name, username FROM JavaGymDatabase.Customers";
+            String sql =
+                    "SELECT customer_id, full_name, username FROM JavaGymDatabase.Customers";
 
             PreparedStatement stmt = Database.connection.prepareStatement(sql);
+
             ResultSet rs = stmt.executeQuery();
 
-            StringBuilder output = new StringBuilder("CUSTOMERS:\n\n");
+            StringBuilder output =
+                    new StringBuilder("CUSTOMERS:\n\n");
 
             while (rs.next()) {
-                output.append("ID: ")
-                        .append(rs.getInt("customer_id"))
+                output.append(rs.getInt("customer_id"))
                         .append(" | ")
                         .append(rs.getString("full_name"))
                         .append(" | ")
@@ -118,23 +337,24 @@ public class EmployeePage extends JFrame {
 
         } catch (Exception e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error loading customers");
         }
     }
 
-    // view employees (Admin)
     private void viewEmployees() {
         try {
-            String sql = "SELECT employee_id, full_name, username FROM JavaGymDatabase.Employees";
+            String sql =
+                    "SELECT employee_id, full_name, username FROM JavaGymDatabase.Employees";
 
-            PreparedStatement stmt = Database.connection.prepareStatement(sql);
+            PreparedStatement stmt =
+                    Database.connection.prepareStatement(sql);
+
             ResultSet rs = stmt.executeQuery();
 
-            StringBuilder output = new StringBuilder("EMPLOYEES:\n\n");
+            StringBuilder output =
+                    new StringBuilder("EMPLOYEES:\n\n");
 
             while (rs.next()) {
-                output.append("ID: ")
-                        .append(rs.getInt("employee_id"))
+                output.append(rs.getInt("employee_id"))
                         .append(" | ")
                         .append(rs.getString("full_name"))
                         .append(" | ")
@@ -146,19 +366,21 @@ public class EmployeePage extends JFrame {
 
         } catch (Exception e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error loading employees");
         }
     }
 
-    // view classes
     private void viewClasses() {
         try {
-            String sql = "SELECT class_name, date, time FROM JavaGymDatabase.Classes";
+            String sql =
+                    "SELECT class_name, date, time FROM JavaGymDatabase.Classes";
 
-            PreparedStatement stmt = Database.connection.prepareStatement(sql);
+            PreparedStatement stmt =
+                    Database.connection.prepareStatement(sql);
+
             ResultSet rs = stmt.executeQuery();
 
-            StringBuilder output = new StringBuilder("CLASSES:\n\n");
+            StringBuilder output =
+                    new StringBuilder("CLASSES:\n\n");
 
             while (rs.next()) {
                 output.append(rs.getString("class_name"))
@@ -176,20 +398,21 @@ public class EmployeePage extends JFrame {
         }
     }
 
-    // view appointments
     private void viewAppointments() {
         try {
-            String sql = "SELECT appointment_id, status FROM JavaGymDatabase.Appointments";
+            String sql =
+                    "SELECT appointment_id, status FROM JavaGymDatabase.Appointments";
 
             PreparedStatement stmt = Database.connection.prepareStatement(sql);
+
             ResultSet rs = stmt.executeQuery();
 
-            StringBuilder output = new StringBuilder("APPOINTMENTS:\n\n");
+            StringBuilder output =
+                    new StringBuilder("APPOINTMENTS:\n\n");
 
             while (rs.next()) {
-                output.append("ID: ")
-                        .append(rs.getInt("appointment_id"))
-                        .append(" | Status: ")
+                output.append(rs.getInt("appointment_id"))
+                        .append(" | ")
                         .append(rs.getString("status"))
                         .append("\n");
             }
@@ -201,26 +424,56 @@ public class EmployeePage extends JFrame {
         }
     }
 
-    // Example of create class
-    private void createClass() {
-        try {
-            String sql = "INSERT INTO JavaGymDatabase.Classes (class_name, date, time, employee_id, isGroupClass) VALUES (?, ?, ?, ?, ?)";
+    // For decline and accept for trainer
+    private void updateAppointmentStatus(String status) {
 
-            PreparedStatement stmt = Database.connection.prepareStatement(sql);
+        JFrame frame = new JFrame(status + " Appointment");
+        frame.setSize(300, 200);
+        frame.setLocationRelativeTo(null);
 
-            stmt.setString(1, "Swimming");
-            stmt.setString(2, "2026-05-01");
-            stmt.setString(3, "06:00:00");
-            stmt.setInt(4, UserSession.userId);
-            stmt.setInt(5, 1);
+        JPanel p = new JPanel(new java.awt.GridLayout(2,2,10,10));
 
-            stmt.executeUpdate();
+        JTextField appointmentId = new JTextField();
+        JButton submitBtn = new JButton("Submit");
 
-            JOptionPane.showMessageDialog(this, "Successfully created class.");
+        p.add(new JLabel("Appointment ID:"));
+        p.add(appointmentId);
+        p.add(new JLabel(""));
+        p.add(submitBtn);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error creating class. Please try again");
-        }
+        submitBtn.addActionListener(e -> {
+            try {
+
+                String sql =
+                        "UPDATE JavaGymDatabase.Appointments " +
+                                "SET status = ? " +
+                                "WHERE appointment_id = ?";
+
+                PreparedStatement stmt = Database.connection.prepareStatement(sql);
+
+                stmt.setString(1, status);
+                stmt.setInt(2,
+                        Integer.parseInt(appointmentId.getText()));
+
+                int rows = stmt.executeUpdate();
+
+                if(rows > 0){
+                    JOptionPane.showMessageDialog(frame,
+                            "Appointment " + status);
+                    frame.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(frame,
+                            "Appointment Not Found");
+                }
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(frame,
+                        "Error updating appointment");
+            }
+        });
+
+        frame.setContentPane(p);
+        frame.setVisible(true);
     }
 }
