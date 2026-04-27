@@ -193,13 +193,22 @@ public class SignUp extends JFrame{
         return true; //phone is available
     }
 
+    public boolean checkPhoneNumberLength(String phoneNumber) {
+
+        if(phoneNumber.length()!=12) {
+            return false;
+        }
+        return true;
+
+
+    }
 //    Action Listeners-----------------------------------------------
 
     public void actionListenerSignUpButton() {
         signUpButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(confirmOneMembershipWasPicked()==false || confirmNonEmptyValues()==false) {
+                if(confirmOneMembershipWasPicked()==false || confirmNonEmptyValues()==false) { //checks if only one memberhship is picked AND if there are no empty values
                     return;
                 } else if(confirmIfDoubleUsername()==false) {
                     JOptionPane.showMessageDialog(null, "That username is already taken. Please choose another.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -207,7 +216,10 @@ public class SignUp extends JFrame{
                 } else if(confirmIfDoublePhoneNumber()==false){
                     JOptionPane.showMessageDialog(null, "Phone Number entered is already in use", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
-                }else{
+                } else if(checkPhoneNumberLength(phonenumberfield.getText())==false) {
+                    JOptionPane.showMessageDialog(null, "Phone Number must be in format: ###-###-####. Ex: 631-123-1234 ", "Error", JOptionPane.ERROR_MESSAGE);
+
+                } else{
                     addUserInfo();
                 }
 
