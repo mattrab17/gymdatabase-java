@@ -22,6 +22,21 @@ public class CustomerPage extends JFrame {
         actionListenerAccountSettingsButton();
         actionListenerLogOutButton();
         actionListenerViewYourClassesButton();
+        actionListenerBookAClassButton();
+    }
+
+    public void actionListenerBookAClassButton() {
+        bookAClassButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                goToBookAClassPage();
+            }
+        });
+    }
+
+    public void goToBookAClassPage() {
+        this.dispose();
+        new CustomerBookAClass();
     }
 
     public void actionListenerViewYourClassesButton() {
