@@ -76,13 +76,50 @@ public class EmployeePage extends JFrame {
         else if (type == 3) {
             title.setText("Admin Dashboard");
 
-            JButton viewEmployeesBtn = new JButton("View All Employees");
-            JButton viewCustomersBtn = new JButton("View All Customers");
-            JButton systemSettingsBtn = new JButton("System Settings");
+            JButton createEmployeeBtn = new JButton("Create Employee");
+            JButton modifyEmployeeBtn = new JButton("Modify Employee");
+            JButton deleteEmployeeBtn = new JButton("Delete Employee");
+
+            JButton modifyCustomerBtn = new JButton("Modify Customer");
+            JButton deleteCustomerBtn = new JButton("Delete Customer");
+
+            JButton resetPasswordBtn = new JButton("Reset Password");
+
+            JButton deleteClassBtn = new JButton("Delete Class");
+            JButton deleteAppointmentBtn = new JButton("Delete Appointment");
+            JButton viewAppointmentsBtn = new JButton("View Appointments");
+
+            JButton viewEmployeesBtn = new JButton("View Employees");
+            JButton viewCustomersBtn = new JButton("View Customers");
+
+            panel.add(createEmployeeBtn);
+            panel.add(modifyEmployeeBtn);
+            panel.add(deleteEmployeeBtn);
+
+            panel.add(modifyCustomerBtn);
+            panel.add(deleteCustomerBtn);
+
+            panel.add(resetPasswordBtn);
+
+            panel.add(deleteClassBtn);
+            panel.add(deleteAppointmentBtn);
+            panel.add(viewAppointmentsBtn);
 
             panel.add(viewEmployeesBtn);
             panel.add(viewCustomersBtn);
-            panel.add(systemSettingsBtn);
+
+            createEmployeeBtn.addActionListener(e -> createEmployee());
+            modifyEmployeeBtn.addActionListener(e -> modifyEmployee());
+            deleteEmployeeBtn.addActionListener(e -> deleteEmployee());
+
+            modifyCustomerBtn.addActionListener(e -> modifyCustomer());
+            deleteCustomerBtn.addActionListener(e -> deleteCustomer());
+
+            resetPasswordBtn.addActionListener(e -> resetPassword());
+
+            deleteClassBtn.addActionListener(e -> openCancelClassPage());
+            deleteAppointmentBtn.addActionListener(e -> deleteAppointment());
+            viewAppointmentsBtn.addActionListener(e -> viewAppointments());
 
             viewEmployeesBtn.addActionListener(e -> viewEmployees());
             viewCustomersBtn.addActionListener(e -> viewMembers());
@@ -474,5 +511,153 @@ public class EmployeePage extends JFrame {
 
         frame.setContentPane(p);
         frame.setVisible(true);
+    }
+    //Create employee for admin dashboard
+    private void createEmployee() {
+        try {
+            String username = JOptionPane.showInputDialog("Username:");
+            String password = JOptionPane.showInputDialog("Password:");
+            String fullName = JOptionPane.showInputDialog("Full Name:");
+            String type = JOptionPane.showInputDialog("Type:\n1 Coach\n2 Receptionist\n3 Admin\n4 Trainer");
+
+            String sql = "INSERT INTO JavaGymDatabase.Employees " +
+                    "(username,password,full_name,employeetypeid) VALUES (?,?,?,?)";
+
+            PreparedStatement stmt = Database.connection.prepareStatement(sql);
+
+            stmt.setString(1, username);
+            stmt.setString(2, password);
+            stmt.setString(3, fullName);
+            stmt.setInt(4, Integer.parseInt(type));
+
+            stmt.executeUpdate();
+
+            JOptionPane.showMessageDialog(this,"Employee Created");
+
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+    //Delete employee for admin dashboard
+    private void deleteEmployee() {
+        try {
+            String id = JOptionPane.showInputDialog("Employee ID:");
+
+            String sql = "DELETE FROM JavaGymDatabase.Employees WHERE employee_id=?";
+
+            PreparedStatement stmt = Database.connection.prepareStatement(sql);
+            stmt.setInt(1,Integer.parseInt(id));
+
+            stmt.executeUpdate();
+
+            JOptionPane.showMessageDialog(this,"Employee Deleted");
+
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+    // Modify employee for admin dashboard
+    private void modifyEmployee() {
+        try {
+            String id = JOptionPane.showInputDialog("Employee ID:");
+            String fullName = JOptionPane.showInputDialog("New Full Name:");
+
+            String sql = "UPDATE JavaGymDatabase.Employees SET full_name=? WHERE employee_id=?";
+
+            PreparedStatement stmt = Database.connection.prepareStatement(sql);
+            stmt.setString(1,fullName);
+            stmt.setInt(2,Integer.parseInt(id));
+
+            stmt.executeUpdate();
+
+            JOptionPane.showMessageDialog(this,"Employee Updated");
+
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+    //reset pw for admin dashboard
+    private void resetPassword() {
+        try {
+            String id = JOptionPane.showInputDialog("Employee ID:");
+            String newPass = JOptionPane.showInputDialog("New Password:");
+
+            String sql = "UPDATE JavaGymDatabase.Employees SET password=? WHERE employee_id=?";
+
+            PreparedStatement stmt = Database.connection.prepareStatement(sql);
+            stmt.setString(1,newPass);
+            stmt.setInt(2,Integer.parseInt(id));
+
+            stmt.executeUpdate();
+
+            JOptionPane.showMessageDialog(this,"Password Reset");
+
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+    //Delete appointment for admin dashboard
+    private void deleteAppointment() {
+        try {
+            String id = JOptionPane.showInputDialog("Appointment ID:");
+
+            String sql = "DELETE FROM JavaGymDatabase.Appointments WHERE appointment_id=?";
+
+            PreparedStatement stmt = Database.connection.prepareStatement(sql);
+            stmt.setInt(1,Integer.parseInt(id));
+
+            stmt.executeUpdate();
+
+            JOptionPane.showMessageDialog(this,"Appointment Deleted");
+
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+    //Modify customer for admin dashboard
+    private void modifyCustomer() {
+        try {
+            String id = JOptionPane.showInputDialog("Customer ID:");
+            String fullName = JOptionPane.showInputDialog("New Full Name:");
+
+            String sql =
+                    "UPDATE JavaGymDatabase.Customers " +
+                            "SET full_name=? WHERE customer_id=?";
+
+            PreparedStatement stmt = Database.connection.prepareStatement(sql);
+
+            stmt.setString(1, fullName);
+            stmt.setInt(2, Integer.parseInt(id));
+
+            stmt.executeUpdate();
+
+            JOptionPane.showMessageDialog(this,
+                    "Customer Updated");
+
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+    //delete customer for admin dashboard
+    private void deleteCustomer() {
+        try {
+            String id = JOptionPane.showInputDialog("Customer ID:");
+
+            String sql =
+                    "DELETE FROM JavaGymDatabase.Customers " +
+                            "WHERE customer_id=?";
+
+            PreparedStatement stmt = Database.connection.prepareStatement(sql);
+
+            stmt.setInt(1, Integer.parseInt(id));
+
+            stmt.executeUpdate();
+
+            JOptionPane.showMessageDialog(this,
+                    "Customer Deleted");
+
+        } catch(Exception e){
+            e.printStackTrace();
+        }
     }
 }
