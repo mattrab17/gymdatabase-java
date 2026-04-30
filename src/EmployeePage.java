@@ -29,12 +29,16 @@ public class EmployeePage extends JFrame {
             JButton cancelMembershipBtn = new JButton("Cancel Membership");
             JButton viewClassesBtn = new JButton("View Classes");
             JButton viewAppointmentsBtn = new JButton("View Trainer Appointments");
+            JButton logOut = new JButton("Log Out");
+
 
             panel.add(viewMembersBtn);
             panel.add(cancelMembershipBtn);
             panel.add(viewClassesBtn);
             panel.add(viewAppointmentsBtn);
+            panel.add(logOut);
 
+            logOut.addActionListener(e -> logOut());
             viewMembersBtn.addActionListener(e -> viewMembers());
             viewClassesBtn.addActionListener(e -> viewClasses());
             cancelMembershipBtn.addActionListener(e -> cancelMembership());
@@ -47,12 +51,17 @@ public class EmployeePage extends JFrame {
 
             JButton createClassBtn = new JButton("Create Fitness Class");
             JButton cancelClassBtn = new JButton("Cancel Fitness Class");
+            JButton logOut = new JButton("Log Out");
+
 
             panel.add(createClassBtn);
             panel.add(cancelClassBtn);
+            panel.add(logOut);
 
+            logOut.addActionListener(e -> logOut());
             createClassBtn.addActionListener(e -> openCreateClassPage());
             cancelClassBtn.addActionListener(e -> openCancelClassPage());
+
         }
 
         // trainer dashboard
@@ -62,11 +71,15 @@ public class EmployeePage extends JFrame {
             JButton viewAppointmentsBtn = new JButton("View Appointments");
             JButton acceptBtn = new JButton("Accept Appointment");
             JButton declineBtn = new JButton("Decline Appointment");
+            JButton logOut = new JButton("Log Out");
+
 
             panel.add(viewAppointmentsBtn);
             panel.add(acceptBtn);
             panel.add(declineBtn);
+            panel.add(logOut);
 
+            logOut.addActionListener(e -> logOut());
             viewAppointmentsBtn.addActionListener(e -> viewAppointments());
             acceptBtn.addActionListener(e -> updateAppointmentStatus("Accepted"));
             declineBtn.addActionListener(e -> updateAppointmentStatus("Declined"));
@@ -92,6 +105,8 @@ public class EmployeePage extends JFrame {
             JButton viewEmployeesBtn = new JButton("View Employees");
             JButton viewCustomersBtn = new JButton("View Customers");
 
+            JButton logOut = new JButton("Log Out");
+
             panel.add(createEmployeeBtn);
             panel.add(modifyEmployeeBtn);
             panel.add(deleteEmployeeBtn);
@@ -107,7 +122,9 @@ public class EmployeePage extends JFrame {
 
             panel.add(viewEmployeesBtn);
             panel.add(viewCustomersBtn);
+            panel.add(logOut);
 
+            logOut.addActionListener(e -> logOut());
             createEmployeeBtn.addActionListener(e -> createEmployee());
             modifyEmployeeBtn.addActionListener(e -> modifyEmployee());
             deleteEmployeeBtn.addActionListener(e -> deleteEmployee());
@@ -127,6 +144,11 @@ public class EmployeePage extends JFrame {
 
         setContentPane(panel);
         setVisible(true);
+    }
+
+    public void logOut() {
+        this.dispose();
+        new MainPage();
     }
 
     // Cancel Membership
